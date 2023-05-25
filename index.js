@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-
+const {exec} = require('child_process');  // for executing shell commands
 const app = express();
 
 // Set up multer storage
@@ -24,6 +24,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+/*
 // Set up a route for file upload
 app.post('/upload', upload.single('file'), (req, res) => {
   if (req.file) {
@@ -34,6 +35,41 @@ app.post('/upload', upload.single('file'), (req, res) => {
     res.status(400).json({ error: 'No file selected' });
   }
 });
+*/
+
+
+// Set up a route for file upload
+app.post('/upload', upload.single('file'), (req, res) => {
+    if (req.file) {
+      const uploadedFileName = req.file.filename;
+  
+      // Run whisper.exe with the uploaded file name as a parameter
+      const command = `C:\\Users\\lisa.shi\\Downloads\\WhisperDesktop.exe -m C:\\Users\\lisa.shi\\Downloads\\ggml-medium.bin -f  ${uploadedFileName}`;
+      
+      exec(command, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error: ${error.message}`);
+          res.status(500).json({ error: 'Failed to execute whisper.exe' });
+          return;
+        }
+        if (stderr) {
+          console.error(`stderr: ${stderr}`);
+        }
+        console.log(`stdout: ${stdout}`);
+        
+        // Handle the output or result of whisper.exe as needed
+        
+        res.json({ message: 'File uploaded and whisper.exe executed successfully' });
+      });
+    } else {
+      // No file was selected
+      res.status(400).json({ error: 'No file selected' });
+    }
+  });
+
+
+
+
 
 // Start the server
 app.listen(3000, () => {
