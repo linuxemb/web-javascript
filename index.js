@@ -4,6 +4,10 @@ const path = require('path');
 const {exec} = require('child_process');  // for executing shell commands
 const app = express();
 
+// fix style sheet wont work
+app.use(express.static('public'));
+
+
 // Set up multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -37,14 +41,13 @@ app.post('/upload', upload.single('file'), (req, res) => {
 });
 */
 
-
 // Set up a route for file upload
 app.post('/upload', upload.single('file'), (req, res) => {
     if (req.file) {
       const uploadedFileName = req.file.filename;
-  
+      const language = req.body.language; // Retrieve the selected language from the form data
       // Run whisper.exe with the uploaded file name as a parameter
-      const command = `C:\\Users\\lisa.shi\\Downloads\\WhisperDesktop.exe -m C:\\Users\\lisa.shi\\Downloads\\ggml-medium.bin -f  ${uploadedFileName}`;
+      const command = `C:\\Users\\lisa.shi\\Downloads\\WhisperDesktop.exe -m C:\\Users\\lisa.shi\\Downloads\\ggml-medium.bin -f  ${uploadedFileName} -l ${language}`;
       
       exec(command, (error, stdout, stderr) => {
         if (error) {
@@ -66,10 +69,6 @@ app.post('/upload', upload.single('file'), (req, res) => {
       res.status(400).json({ error: 'No file selected' });
     }
   });
-
-
-
-
 
 // Start the server
 app.listen(3000, () => {
