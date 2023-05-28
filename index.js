@@ -21,7 +21,10 @@ const storage = multer.diskStorage({
 });
 
 // Create a multer instance with the configured storage
-const upload = multer({ storage: storage });
+const upload = multer({ 
+    storage: storage ,
+    limits: { fileSize: 10 * 1024 * 1024 } // Increase limit to 10MB
+  });
 
 // Serve the index.html file as the default page
 app.get('/', (req, res) => {
@@ -41,8 +44,14 @@ app.post('/upload', upload.single('file'), (req, res) => {
 });
 */
 
+
+
+
 // Set up a route for file upload
 app.post('/upload', upload.single('file'), (req, res) => {
+    // Show the progress indicator
+  // res.write('<div id="progress">Processing...</div>');
+   
     if (req.file) {
       const uploadedFileName = req.file.filename;
       const language = req.body.language; // Retrieve the selected language from the form data
@@ -61,14 +70,19 @@ app.post('/upload', upload.single('file'), (req, res) => {
         console.log(`stdout: ${stdout}`);
         
         // Handle the output or result of whisper.exe as needed
-        
         res.json({ message: 'File uploaded and whisper.exe executed successfully' });
+      // Update the result section with the download link
+      // const downloadLink = `<a href="/download?file=${uploadedFileName}">Download Result</a>`;
+      // res.write('<div id="result">Process completed. ' + downloadLink + '</div>');
+      // res.end();
+
       });
     } else {
       // No file was selected
-      res.status(400).json({ error: 'No file selected' });
+      res.status(400).json({ error: 'No file selected or the exe file run results failed' });
     }
   });
+
 
 // Start the server
 app.listen(3000, () => {
